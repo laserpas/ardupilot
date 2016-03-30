@@ -52,22 +52,49 @@ const AP_Param::GroupInfo AP_Parachute::var_info[] = {
     // @User: Standard
     AP_GROUPINFO("ALT_MIN", 4, AP_Parachute, _alt_min, AP_PARACHUTE_ALT_MIN_DEFAULT),
 
+    // @Param: ALT_MAX
+    // @DisplayName: Parachute max altitude in meters above home
+    // @Description: Parachute max altitude above home.  Parachute will not be released above this altitude.  -1 to disable alt check.
+    // @Range: -1 32000
+    // @Units: Meters
+    // @Increment: 1
+    // @User: Standard
+    AP_GROUPINFO("ALT_MAX", 5, AP_Parachute, _alt_max, AP_PARACHUTE_ALT_MAX_DEFAULT),
+
 #if APM_BUILD_TYPE(APM_BUILD_ArduPlane)
     // @Param: AUTO_ON
     // @DisplayName: Parachute automatic emergency release
     // @Description: Parachute automatic emergency release enabled or disabled.
     // @Values: 0:Disabled,1:Enabled
     // @User: Standard
-    AP_GROUPINFO("AUTO_ON", 5, AP_Parachute, _auto_enabled, AP_PARACHUTE_AUTO_ON_DEFAULT),
+    AP_GROUPINFO("AUTO_ON", 6, AP_Parachute, _auto_enabled, AP_PARACHUTE_AUTO_ON_DEFAULT),
 
-    // @Param: AUTO_ERROR
-    // @DisplayName: Altitude deviation for parachute release
-    // @Description: Altitude deviation at which to release parachute if in AUTO and CHUTE_AUTO_ON.
-    // @Units: Meters
-    // @Range: 10 32767
+    // @Param: ROLL_MRGN
+    // @DisplayName: Roll deviation margin on top of LIM_ROLL_CD for automatic parachute release
+    // @Description: Roll deviation margin on top of LIM_ROLL_CD at which to release parachute if in AUTO and CHUTE_AUTO_ON.
+    // @Units: centi-Degrees
+    // @Range: 0 9000
     // @Increment: 1
     // @User: Standard
-    AP_GROUPINFO("AUTO_ERROR", 6, AP_Parachute, _auto_error, AP_PARACHUTE_AUTO_ERROR_DEFAULT),
+    AP_GROUPINFO("ROLL_MRGN", 7, AP_Parachute, _emergency_roll_margin, AP_PARACHUTE_ROLL_MRGN_DEFAULT),
+
+    // @Param: PITCH_MRGN
+    // @DisplayName: Pitch deviation margin below LIM_PITCH_MIN for automatic parachute release
+    // @Description: Pitch deviation margin below LIM_PITCH_MIN at which to release parachute if in AUTO and CHUTE_AUTO_ON.
+    // @Units: centi-Degrees
+    // @Range: 0 9000
+    // @Increment: 1
+    // @User: Standard
+    AP_GROUPINFO("PITCH_MRGN", 8, AP_Parachute, _emergency_pitch_margin, AP_PARACHUTE_PITCH_MRGN_DEFAULT),
+
+    // @Param: SINK_RATE
+    // @DisplayName: Sink rate for automatic parachute release
+    // @Description: Sink rate at which to release parachute if in AUTO and CHUTE_AUTO_ON.
+    // @Units: m/s
+    // @Range: 0.0 20.0
+    // @Increment: 1
+    // @User: Standard
+    AP_GROUPINFO("SINK_RATE", 9, AP_Parachute, _emergency_sink_rate, AP_PARACHUTE_SINK_RATE_DEFAULT),
 #endif
 
     AP_GROUPEND
@@ -143,5 +170,10 @@ void AP_Parachute::update()
 void AP_Parachute::control_loss_ms(uint32_t time)
 {
     _control_loss_ms = time;
+}
+
+void AP_Parachute::emergency_start_ms(uint32_t time)
+{
+    _emergency_start_ms = time;
 }
 #endif

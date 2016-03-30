@@ -22,9 +22,12 @@
 #define AP_PARACHUTE_SERVO_OFF_PWM_DEFAULT     1100    // default PWM value to move servo to when shutter is deactivated
 
 #define AP_PARACHUTE_ALT_MIN_DEFAULT            10     // default min altitude the vehicle should have before parachute is released
+#define AP_PARACHUTE_ALT_MAX_DEFAULT            30     // default max altitude above which the parachute should not be released
 
 #define AP_PARACHUTE_AUTO_ON_DEFAULT            0      // automatic emergency parachute release is off by default
-#define AP_PARACHUTE_AUTO_ERROR_DEFAULT         20     // altitude error at which to deploy parachute automatically
+#define AP_PARACHUTE_ROLL_MRGN_DEFAULT          500    // roll error above roll_limit_cd in centidegrees at which to deploy parachute automatically
+#define AP_PARACHUTE_PITCH_MRGN_DEFAULT         500    // pitch error below pitch_limit_min_cd in centidegrees at which to deploy parachute automatically
+#define AP_PARACHUTE_SINK_RATE_DEFAULT          5      // sink rate in m/s at which to deploy parachute automatically
 
 /// @class	AP_Parachute
 /// @brief	Class managing the release of a parachute
@@ -61,12 +64,20 @@ public:
     ///   0 = altitude check disabled
     int16_t alt_min() const { return _alt_min; }
 
+    /// alt_max - returns the max altitude above home, above which the parachute should not be released
+    int16_t alt_max() const { return _alt_max; }
+
 #if APM_BUILD_TYPE(APM_BUILD_ArduPlane)
     /// the time when control of aircraft was continuously lost
     void control_loss_ms(uint32_t time);
     uint32_t control_loss_ms() const { return _control_loss_ms; }
 
-    int16_t auto_error_cm() const { return _auto_error * 100.0f; }
+    void emergency_start_ms(uint32_t time);
+    uint32_t emergency_start_ms() const { return _emergency_start_ms; }
+
+    int16_t emergency_roll_margin() const { return _emergency_roll_margin; }
+    int16_t emergency_pitch_margin() const { return _emergency_pitch_margin; }
+    int16_t emergency_sink_rate() const { return _emergency_sink_rate; }
 
     /// auto_enabled - returns true if parachute automatic emergency release is enabled
     bool auto_enabled() const { return enabled() && _auto_enabled; }
@@ -81,9 +92,12 @@ private:
     AP_Int16    _servo_on_pwm;  // PWM value to move servo to when shutter is activated
     AP_Int16    _servo_off_pwm; // PWM value to move servo to when shutter is deactivated
     AP_Int16    _alt_min;       // min altitude the vehicle should have before parachute is released
+    AP_Int16    _alt_max;       // max altitude above which the parachute should not be released
 #if APM_BUILD_TYPE(APM_BUILD_ArduPlane)
-    AP_Int8     _auto_enabled;  // 1 if automatic emergency parachute release is enabled
-    AP_Int16    _auto_error;    // altitude error in metres at which to deploy parachute automatically (if enabled)
+    AP_Int8     _auto_enabled;            // 1 if automatic emergency parachute release is enabled
+    AP_Int16    _emergency_roll_margin;   // roll error above roll_limit_cd in centidegrees at which to deploy parachute automatically (if enabled)
+    AP_Int16    _emergency_pitch_margin;  // pitch error below pitch_limit_min_cd in centidegrees at which to deploy parachute automatically (if enabled)
+    AP_Int16    _emergency_sink_rate;     // sink rate in m/s at which to deploy parachute automatically (if enabled)
 #endif
 
     // internal variables
@@ -92,6 +106,7 @@ private:
     bool        _release_in_progress:1;  // true if the parachute release is in progress
     bool        _released:1;    // true if the parachute has been released
 #if APM_BUILD_TYPE(APM_BUILD_ArduPlane)
-    uint32_t    _control_loss_ms;  // automatic parachute deployment check, start of continuously lost control
+    uint32_t    _control_loss_ms;     // automatic parachute deployment check, start of continuously lost control
+    uint32_t    _emergency_start_ms;  // automatic parachute deployment check, start of emergency mode
 #endif
 };
