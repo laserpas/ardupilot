@@ -25,18 +25,6 @@ void Plane::parachute_release()
     if (parachute.released()) {
         return;
     }
-
-    if (relative_altitude() < parachute.alt_min()) {
-        // too low for parachute deployment
-        gcs_send_text(MAV_SEVERITY_WARNING, "Parachute: Too low");
-        return;
-    }
-
-    if (parachute.alt_max() >= 0 && relative_altitude() > parachute.alt_max()) {
-        // too high for parachute deployment
-        gcs_send_text(MAV_SEVERITY_WARNING, "Parachute: Too high");
-        return;
-    }
     
     // send message to gcs and dataflash
     gcs_send_text(MAV_SEVERITY_CRITICAL,"Parachute: Released");
@@ -80,7 +68,7 @@ void Plane::parachute_emergency_check()
     bool emergency_mode = false;
 
     // exit immediately if parachute or automatic release is not enabled, or already released
-    if (!parachute.auto_enabled() || parachute.released()) {
+    if (!parachute.auto_enabled() || parachute.release_initiated()) {
         parachute.control_loss_ms(0);
         return;
     }
@@ -100,12 +88,17 @@ void Plane::parachute_emergency_check()
         return;
     }
 
-    gcs_send_text_fmt(MAV_SEVERITY_WARNING, "Roll: %d, emergency at: %d", labs(ahrs.roll_sensor), g.roll_limit_cd + 5);
-
     if (labs(ahrs.roll_sensor) < g.roll_limit_cd + parachute.emergency_roll_margin() &&
         ahrs.pitch_sensor > aparm.pitch_limit_min_cd - parachute.emergency_pitch_margin() &&
         auto_state.sink_rate < parachute.emergency_sink_rate()) {
-        // none of the emergency triggers worked
+        // none of the advanced emergency triggers worked
+    } else {
+        // some of the advanced emergency triggers worked
+        gcs_send_text_fmt(MAV_SEVERITY_WARNING, "Emergency: Roll %d, Pitch %d, Sink %.2f", labs(ahrs.roll_sensor), ahrs.pitch_sensor, auto_state.sink_rate);
+    }
+
+    // do not release if emergency altitude is not reached
+    if (relative_altitude() > parachute.emergency_alt_threshold()) {
         parachute.control_loss_ms(0);
         return;
     }
@@ -124,8 +117,11 @@ void Plane::parachute_emergency_check()
 
     if (emergency_mode && now - parachute.emergency_start_ms() < PARACHUTE_EMERGENCY_DURATION_MS) {
         // try to release parachute whenever in emergency mode
-        gcs_send_text(MAV_SEVERITY_WARNING, "Emergency: Trying to release parachute");
-        parachute_release();
+        if (relative_altitude() > parachute.alt_min() &&
+            (parachute.alt_max() < 0 || relative_altitude() < parachute.alt_max())) {
+            // altitude suitable for parachute deployment
+            parachute_release();
+        }
     } else if (emergency_mode) {
         // emergency mode expired (neither continuous loss of control, nor parachute deployed)
         gcs_send_text(MAV_SEVERITY_WARNING, "Emergency: Control restored");

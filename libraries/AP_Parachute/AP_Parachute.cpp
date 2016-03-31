@@ -95,6 +95,16 @@ const AP_Param::GroupInfo AP_Parachute::var_info[] = {
     // @Increment: 1
     // @User: Standard
     AP_GROUPINFO("SINK_RATE", 9, AP_Parachute, _emergency_sink_rate, AP_PARACHUTE_SINK_RATE_DEFAULT),
+
+
+    // @Param: ALT_THRESH
+    // @DisplayName: Altitude threshold for automatic parachute release
+    // @Description: Altitude above home at which to release parachute if in AUTO and CHUTE_AUTO_ON.
+    // @Units: m
+    // @Range: 0 32000
+    // @Increment: 1
+    // @User: Standard
+    AP_GROUPINFO("ALT_THRESH", 10, AP_Parachute, _emergency_alt_threshold, AP_PARACHUTE_ALT_THRESH_DEFAULT),
 #endif
 
     AP_GROUPEND
@@ -121,6 +131,8 @@ void AP_Parachute::release()
     if (_release_time == 0) {
         _release_time = AP_HAL::millis();
     }
+
+    _release_initiated = true;
 
     // update AP_Notify
     AP_Notify::flags.parachute_release = 1;

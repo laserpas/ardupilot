@@ -28,6 +28,7 @@
 #define AP_PARACHUTE_ROLL_MRGN_DEFAULT          500    // roll error above roll_limit_cd in centidegrees at which to deploy parachute automatically
 #define AP_PARACHUTE_PITCH_MRGN_DEFAULT         500    // pitch error below pitch_limit_min_cd in centidegrees at which to deploy parachute automatically
 #define AP_PARACHUTE_SINK_RATE_DEFAULT          5      // sink rate in m/s at which to deploy parachute automatically
+#define AP_PARACHUTE_ALT_THRESH_DEFAULT            50     // altitude threshold above home at which to deploy parachute automatically
 
 /// @class	AP_Parachute
 /// @brief	Class managing the release of a parachute
@@ -56,7 +57,10 @@ public:
 
     /// released - true if the parachute has been released (or release is in progress)
     bool released() const { return _released; }
-    
+
+    /// release_initiated - true if the parachute release sequence has been initiated (may take some time to actually deploy)
+    bool release_initiated() const { return _release_initiated; }
+
     /// update - shuts off the trigger should be called at about 10hz
     void update();
 
@@ -77,7 +81,8 @@ public:
 
     int16_t emergency_roll_margin() const { return _emergency_roll_margin; }
     int16_t emergency_pitch_margin() const { return _emergency_pitch_margin; }
-    int16_t emergency_sink_rate() const { return _emergency_sink_rate; }
+    float emergency_sink_rate() const { return _emergency_sink_rate; }
+    int16_t emergency_alt_threshold() const { return _emergency_alt_threshold; }
 
     /// auto_enabled - returns true if parachute automatic emergency release is enabled
     bool auto_enabled() const { return enabled() && _auto_enabled; }
@@ -94,17 +99,19 @@ private:
     AP_Int16    _alt_min;       // min altitude the vehicle should have before parachute is released
     AP_Int16    _alt_max;       // max altitude above which the parachute should not be released
 #if APM_BUILD_TYPE(APM_BUILD_ArduPlane)
-    AP_Int8     _auto_enabled;            // 1 if automatic emergency parachute release is enabled
-    AP_Int16    _emergency_roll_margin;   // roll error above roll_limit_cd in centidegrees at which to deploy parachute automatically (if enabled)
-    AP_Int16    _emergency_pitch_margin;  // pitch error below pitch_limit_min_cd in centidegrees at which to deploy parachute automatically (if enabled)
-    AP_Int16    _emergency_sink_rate;     // sink rate in m/s at which to deploy parachute automatically (if enabled)
+    AP_Int8     _auto_enabled;             // 1 if automatic emergency parachute release is enabled
+    AP_Int16    _emergency_roll_margin;    // roll error above roll_limit_cd in centidegrees at which to deploy parachute automatically (if enabled)
+    AP_Int16    _emergency_pitch_margin;   // pitch error below pitch_limit_min_cd in centidegrees at which to deploy parachute automatically (if enabled)
+    AP_Float    _emergency_sink_rate;      // sink rate in m/s at which to deploy parachute automatically (if enabled)
+    AP_Int16    _emergency_alt_threshold;  // altitude threshold above home at which to deploy parachute automatically (if enabled)
 #endif
 
     // internal variables
     AP_Relay   &_relay;         // pointer to relay object from the base class Relay.
     uint32_t    _release_time;  // system time that parachute is ordered to be released (actual release will happen 0.5 seconds later)
-    bool        _release_in_progress:1;  // true if the parachute release is in progress
-    bool        _released:1;    // true if the parachute has been released
+    bool        _release_in_progress:1; // true if the parachute release is in progress
+    bool        _release_initiated:1;   // true if the parachute release initiated (may still be waiting for engine to disarm etc.)
+    bool        _released:1;            // true if the parachute has been released
 #if APM_BUILD_TYPE(APM_BUILD_ArduPlane)
     uint32_t    _control_loss_ms;     // automatic parachute deployment check, start of continuously lost control
     uint32_t    _emergency_start_ms;  // automatic parachute deployment check, start of emergency mode
