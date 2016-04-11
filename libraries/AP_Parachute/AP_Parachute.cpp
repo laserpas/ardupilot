@@ -68,7 +68,7 @@ const AP_Param::GroupInfo AP_Parachute::var_info[] = {
     // @Units: Milliseconds
     // @Increment: 1
     // @User: Standard
-    AP_GROUPINFO("DELAY_MS", 5, AP_Parachute, _delay_ms, AP_PARACHUTE_RELEASE_DELAY_MS),
+    AP_GROUPINFO("DELAY_MS", 6, AP_Parachute, _delay_ms, AP_PARACHUTE_RELEASE_DELAY_MS),
 
 #if APM_BUILD_TYPE(APM_BUILD_ArduPlane)
     // @Param: AUTO_ON
@@ -76,7 +76,7 @@ const AP_Param::GroupInfo AP_Parachute::var_info[] = {
     // @Description: Parachute automatic emergency release enabled or disabled.
     // @Values: 0:Disabled,1:Enabled
     // @User: Standard
-    AP_GROUPINFO("AUTO_ON", 6, AP_Parachute, _auto_enabled, AP_PARACHUTE_AUTO_ON_DEFAULT),
+    AP_GROUPINFO("AUTO_ON", 7, AP_Parachute, _auto_enabled, AP_PARACHUTE_AUTO_ON_DEFAULT),
 
     // @Param: ROLL_MRGN
     // @DisplayName: Roll deviation margin on top of LIM_ROLL_CD for automatic parachute release
@@ -85,7 +85,7 @@ const AP_Param::GroupInfo AP_Parachute::var_info[] = {
     // @Range: 0 9000
     // @Increment: 1
     // @User: Standard
-    AP_GROUPINFO("ROLL_MRGN", 7, AP_Parachute, _emergency_roll_margin, AP_PARACHUTE_ROLL_MRGN_DEFAULT),
+    AP_GROUPINFO("ROLL_MRGN", 8, AP_Parachute, _emergency_roll_margin, AP_PARACHUTE_ROLL_MRGN_DEFAULT),
 
     // @Param: PITCH_MRGN
     // @DisplayName: Pitch deviation margin below LIM_PITCH_MIN for automatic parachute release
@@ -94,7 +94,7 @@ const AP_Param::GroupInfo AP_Parachute::var_info[] = {
     // @Range: 0 9000
     // @Increment: 1
     // @User: Standard
-    AP_GROUPINFO("PITCH_MRGN", 8, AP_Parachute, _emergency_pitch_margin, AP_PARACHUTE_PITCH_MRGN_DEFAULT),
+    AP_GROUPINFO("PITCH_MRGN", 9, AP_Parachute, _emergency_pitch_margin, AP_PARACHUTE_PITCH_MRGN_DEFAULT),
 
     // @Param: SINK_RATE
     // @DisplayName: Sink rate for automatic parachute release
@@ -103,7 +103,7 @@ const AP_Param::GroupInfo AP_Parachute::var_info[] = {
     // @Range: 0.0 20.0
     // @Increment: 1
     // @User: Standard
-    AP_GROUPINFO("SINK_RATE", 9, AP_Parachute, _emergency_sink_rate, AP_PARACHUTE_SINK_RATE_DEFAULT),
+    AP_GROUPINFO("SINK_RATE", 10, AP_Parachute, _emergency_sink_rate, AP_PARACHUTE_SINK_RATE_DEFAULT),
 
 
     // @Param: ALT_THRESH
@@ -113,7 +113,7 @@ const AP_Param::GroupInfo AP_Parachute::var_info[] = {
     // @Range: 0 32000
     // @Increment: 1
     // @User: Standard
-    AP_GROUPINFO("ALT_THRESH", 10, AP_Parachute, _emergency_alt_threshold, AP_PARACHUTE_ALT_THRESH_DEFAULT),
+    AP_GROUPINFO("ALT_THRESH", 11, AP_Parachute, _emergency_alt_threshold, AP_PARACHUTE_ALT_THRESH_DEFAULT),
 #endif
 
     AP_GROUPEND
